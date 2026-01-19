@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>IELTS Writing Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    /* COPY ALL THE ORIGINAL CSS FROM YOUR TEST.HTML HERE */
+    /* I'm keeping it the same, just adding dynamic loading */
+  </style>
+</head>
+<body>
+  <!-- Same HTML structure as your original test.html -->
+  <!-- But we'll dynamically load test content -->
+  
+  <script>
+    // Get test ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const testId = parseInt(urlParams.get('test')) || 1;
+    
+    // Load tests data
+    let tests = [];
+    let currentTest = {};
+    let studentInfo = {};
+    
+    function initializeTest() {
+      // Load tests from localStorage
+      const savedTests = localStorage.getItem('ielts_tests');
+      tests = savedTests ? JSON.parse(savedTests) : [];
+      
+      // Load student info
+      const savedStudent = localStorage.getItem('current_student');
+      studentInfo = savedStudent ? JSON.parse(savedStudent) : {};
+      
+      // Find current test
+      currentTest = tests.find(t => t.id === testId) || tests[0];
+      
+      if (!currentTest) {
+        alert('Test not found!');
+        window.location.href = 'index.html';
+        return;
+      }
+      
+      // Update test content
+      document.getElementById('left1').querySelector('.task-content p').innerHTML = 
+        `<strong>${currentTest.task1.question}</strong>`;
+      
+      if (currentTest.task1.image) {
+        document.querySelector('.image-container img').src = currentTest.task1.image;
+      }
+      
+      document.getElementById('left2').querySelector('.task-content p').innerHTML = 
+        `<strong>${currentTest.task2}</strong>`;
+      
+      // Set student info
+      if (studentInfo.name && studentInfo.teacher) {
+        document.getElementById('studentNameDisplay').innerHTML = 
+          `Teacher: ${studentInfo.teacher}<br>Student: ${studentInfo.name}`;
+      }
+      
+      // Initialize all other functions from your original test.html
+      initializePage();
+    }
+    
+    // COPY ALL YOUR ORIGINAL JAVASCRIPT FUNCTIONS HERE
+    // But replace the hardcoded test content with currentTest data
+    
+    // For the submitTest function, update the Telegram message to include test number:
+    const telegramMessage = `📝 IELTS WRITING TEST #${testId} SUBMITTED
+    // ... rest of your message
+    `;
+    
+    // For downloadPDF, update the title:
+    doc.text(`IELTS Writing Test - Set ${testId}`, 10, 10);
+    
+    // Initialize when page loads
+    window.onload = initializeTest;
+  </script>
+</body>
+</html>

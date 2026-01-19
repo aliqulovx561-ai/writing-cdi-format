@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>IELTS Writing Tests</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 800px;
+      overflow: hidden;
+    }
+    .header {
+      background: #2d3748;
+      color: white;
+      padding: 25px;
+      text-align: center;
+    }
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    .main-content {
+      padding: 30px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    .tests-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 15px;
+      margin-top: 25px;
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 10px;
+    }
+    .test-card {
+      background: #f8f9fa;
+      border: 2px solid #dee2e6;
+      border-radius: 10px;
+      padding: 20px 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+    }
+    .test-card:hover {
+      transform: translateY(-3px);
+      border-color: #667eea;
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+    }
+    .test-card.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+    .test-card.locked {
+      background: #e9ecef;
+      color: #6c757d;
+      cursor: not-allowed;
+    }
+    .test-number {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .test-title {
+      font-size: 14px;
+    }
+    .lock-icon {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 14px;
+    }
+    .start-btn {
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 25px;
+      transition: transform 0.3s;
+    }
+    .start-btn:hover {
+      transform: translateY(-2px);
+    }
+    .start-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .password-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+    .admin-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .admin-link a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎯 IELTS Writing Tests</h1>
+      <p>Select a test from 1 to 30</p>
+    </div>
+    
+    <div class="main-content">
+      <div class="form-group">
+        <label for="studentName">Full Name</label>
+        <input type="text" id="studentName" placeholder="Enter your full name" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="teacherName">Teacher</label>
+        <select id="teacherName" required>
+          <option value="">Select teacher</option>
+          <option value="Mr Doniyor">Mr Doniyor</option>
+          <option value="Mr Xurshid">Mr Xurshid</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      
+      <h3>Select Test (1-30):</h3>
+      <div class="tests-grid" id="testsGrid">
+        <!-- Tests will be loaded here -->
+      </div>
+      
+      <button class="start-btn" id="startBtn" onclick="startTest()" disabled>Start Selected Test</button>
+      
+      <div class="admin-link">
+        <a href="admin.html" target="_blank">🔧 Add/Edit Tests (Admin)</a>
+      </div>
+    </div>
+  </div>
+  
+  <div class="password-modal" id="passwordModal">
+    <div class="modal-content">
+      <h3>🔒 Test Locked</h3>
+      <p>Test <span id="lockedTestNumber"></span> requires a password</p>
+      <input type="password" id="testPassword" placeholder="Enter password" style="width:100%;padding:12px;margin:15px 0;font-size:16px;">
+      <div style="display:flex;gap:10px;">
+        <button onclick="checkPassword()" style="flex:1;padding:12px;background:#48bb78;color:white;border:none;border-radius:6px;">Submit</button>
+        <button onclick="closePasswordModal()" style="flex:1;padding:12px;background:#e53e3e;color:white;border:none;border-radius:6px;">Cancel</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Load tests from localStorage or use default
+    let tests = [];
+    let selectedTest = null;
+    const TOTAL_TESTS = 30;
+    
+    function loadTests() {
+      // Try to load from localStorage
+      const savedTests = localStorage.getItem('ielts_tests');
+      if (savedTests) {
+        tests = JSON.parse(savedTests);
+      } else {
+        // Create default tests 1-30
+        tests = [];
+        for (let i = 1; i <= TOTAL_TESTS; i++) {
+          tests.push({
+            id: i,
+            title: `Writing Set ${i}`,
+            status: i === 1 ? 'active' : 'locked', // Only first test active by default
+            password: i === 1 ? '' : `test${i}`, // Default password for locked tests
+            task1: {
+              question: i === 1 ? "The graph below shows the number of inquiries..." : "Task 1 question for test " + i,
+              image: i === 1 ? "https://i.ibb.co/4RmQYKpw/line-grapht-task-one.jpg" : ""
+            },
+            task2: i === 1 ? "In many countries, traditional foods are being replaced..." : "Task 2 question for test " + i
+          });
+        }
+        saveTests();
+      }
+      
+      displayTests();
+    }
+    
+    function saveTests() {
+      localStorage.setItem('ielts_tests', JSON.stringify(tests));
+    }
+    
+    function displayTests() {
+      const testsGrid = document.getElementById('testsGrid');
+      testsGrid.innerHTML = '';
+      
+      tests.forEach(test => {
+        const card = document.createElement('div');
+        card.className = 'test-card';
+        if (test.status === 'locked') card.classList.add('locked');
+        
+        card.innerHTML = `
+          <div class="test-number">${test.id}</div>
+          <div class="test-title">${test.title}</div>
+          ${test.status === 'locked' ? '<div class="lock-icon">🔒</div>' : ''}
+        `;
+        
+        card.onclick = () => selectTest(test);
+        testsGrid.appendChild(card);
+      });
+    }
+    
+    function selectTest(test) {
+      if (test.status === 'locked') {
+        document.getElementById('lockedTestNumber').textContent = test.id;
+        document.getElementById('passwordModal').style.display = 'flex';
+        document.getElementById('testPassword').focus();
+        selectedTest = test;
+        return;
+      }
+      
+      // Remove active class from all cards
+      document.querySelectorAll('.test-card').forEach(card => {
+        card.classList.remove('active');
+      });
+      
+      // Add active class to selected card
+      event.target.closest('.test-card').classList.add('active');
+      
+      selectedTest = test;
+      document.getElementById('startBtn').disabled = false;
+    }
+    
+    function checkPassword() {
+      const password = document.getElementById('testPassword').value;
+      const testId = selectedTest.id;
+      
+      // Check if password matches
+      if (password === selectedTest.password) {
+        // Unlock the test
+        selectedTest.status = 'active';
+        saveTests();
+        closePasswordModal();
+        displayTests();
+        
+        // Select the test
+        document.querySelector(`.test-card:nth-child(${testId})`).click();
+      } else {
+        alert('Incorrect password! Try again.');
+        document.getElementById('testPassword').value = '';
+        document.getElementById('testPassword').focus();
+      }
+    }
+    
+    function closePasswordModal() {
+      document.getElementById('passwordModal').style.display = 'none';
+      document.getElementById('testPassword').value = '';
+      selectedTest = null;
+    }
+    
+    function startTest() {
+      if (!selectedTest) {
+        alert('Please select a test first!');
+        return;
+      }
+      
+      const studentName = document.getElementById('studentName').value.trim();
+      const teacherName = document.getElementById('teacherName').value;
+      
+      if (!studentName || studentName.length < 2) {
+        alert('Please enter your full name (min 2 characters)');
+        return;
+      }
+      
+      if (!teacherName) {
+        alert('Please select your teacher');
+        return;
+      }
+      
+      // Save student info to localStorage
+      localStorage.setItem('current_student', JSON.stringify({
+        name: studentName,
+        teacher: teacherName,
+        testId: selectedTest.id
+      }));
+      
+      // Redirect to test page
+      window.location.href = `test.html?test=${selectedTest.id}`;
+    }
+    
+    // Initialize on page load
+    window.onload = function() {
+      loadTests();
+      
+      // Auto-fill saved student name if exists
+      const savedStudent = localStorage.getItem('current_student');
+      if (savedStudent) {
+        const student = JSON.parse(savedStudent);
+        document.getElementById('studentName').value = student.name || '';
+      }
+    };
+  </script>
+</body>
+</html>
